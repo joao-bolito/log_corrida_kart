@@ -1,0 +1,56 @@
+# Corrida de Kart - Analisador de Log em PHP
+
+## Descrição
+
+Este projeto em **PHP padrão** processa um arquivo de log de corrida de Kart e gera um **ranking completo dos pilotos**, incluindo:
+
+- Posição final
+- Código do piloto
+- Nome do piloto
+- Quantidade de voltas completadas
+- Tempo total da corrida
+- Melhor volta de cada piloto
+- Velocidade média de cada piloto
+- Diferença em relação ao vencedor
+- Melhor volta da corrida e o piloto que a fez
+
+O objetivo é demonstrar **boa organização de código**, clareza, tratamento de dados e apresentação estruturada.
+
+---
+
+## Estrutura do Projeto
+/LOGS_CORRIDA_KART/
+│
+├─ corrida.txt # Arquivo de log da corrida
+├─ index.php # Script principal que processa o log
+└─ README.md # Este arquivo
+
+---
+
+## Como Utilizar
+
+1. Coloque o arquivo de log da corrida (`corrida.txt`) na mesma pasta do script `index.php`.
+2. O arquivo de log deve seguir o formato:
+
+Hora Piloto Nº Volta Tempo Volta Velocidade média da volta
+23:49:08.277 038 – F.MASSA 1 1:02.852 44,275
+23:49:10.858 033 – R.BARRICHELLO 1 1:04.352 43,243
+
+...
+
+3. Execute o script PHP no terminal:
+
+- php index.php
+
+
+EXEMPLO DE SAIDA:
+Posição  Código   Piloto            Voltas  Tempo Total  Melhor Volta  Velocidade Média  Diferença
+--------------------------------------------------------------------------------------------------
+1        038      F.MASSA           4       4:11.578     1:02.769      44.246            -
+2        002      K.RAIKKONEN       4       4:15.153     1:03.076      43.627            0:03.575
+3        033      R.BARRICHELLO     4       4:16.080     1:03.716      43.468            0:04.502
+4        023      M.WEBBER          4       4:17.722     1:04.216      43.191            0:06.144
+5        015      F.ALONSO          4       4:54.221     1:07.011      38.066            0:42.643
+6        011      S.VETTEL          3       6:27.276     1:18.097      25.746            2:15.698
+
+Melhor volta da corrida: 1:02.769 (F.MASSA)
