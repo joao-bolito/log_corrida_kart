@@ -18,26 +18,26 @@ function formatarTempo($segundos) {
 
 // Lê o arquivo e ignora cabeçalho
 $linhas = file($arquivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-array_shift($linhas); // remove a primeira linha (cabeçalho)
+array_shift($linhas); // remove cabeçalho
 
 $pilotos = [];
-$voltasMax = 4; // corrida acaba em 4 voltas
+$voltasMax = 4;
 $primeiroFim = null;
+$melhorVoltaGeral = null;
+$pilotoMelhorVolta = null;
 
 // Processa cada linha do log
 foreach ($linhas as $linha) {
-    // Exemplo de linha:
-    // 23:49:08.277 038 – F.MASSA 1 1:02.852 44,275
-
     $partes = preg_split('/\s+/', $linha);
 
-    $hora = $partes[0];                   // Hora da volta
-    $codigo = $partes[1];                 // Código do piloto
-    $volta = (int)$partes[4];             // Nº da volta
-    $tempoVolta = $partes[5];             // Tempo da volta
+    $hora = $partes[0];                  
+    $codigo = $partes[1];                 
+    $volta = (int)$partes[4];            
+    $tempoVolta = $partes[5];             
+    $velocidade = str_replace(",", ".", $partes[6]); // Velocidade média da volta
 
     // Junta nome completo (ex: "F.MASSA")
-    if ($partes[2] === "–") {
+    if ($partes[2] === "-" || $partes[2] === "–") {
         $nome = $partes[3];
     } else {
         $nome = $partes[2] . " " . $partes[3];
@@ -54,6 +54,7 @@ foreach ($linhas as $linha) {
             "voltas" => 0,
             "tempoTotal" => 0.0,
             "melhorVolta" => null,
+            "velocidades" => [],
             "ultimaHora" => $hora
         ];
     }
@@ -62,10 +63,17 @@ foreach ($linhas as $linha) {
     $pilotos[$codigo]["voltas"] = $volta;
     $pilotos[$codigo]["tempoTotal"] += $tempoSegundos;
     $pilotos[$codigo]["ultimaHora"] = $hora;
+    $pilotos[$codigo]["velocidades"][] = (float)$velocidade;
 
-    // Atualiza melhor volta
+    // Atualiza melhor volta do piloto
     if ($pilotos[$codigo]["melhorVolta"] === null || $tempoSegundos < $pilotos[$codigo]["melhorVolta"]) {
         $pilotos[$codigo]["melhorVolta"] = $tempoSegundos;
+    }
+
+    // Atualiza melhor volta geral
+    if ($melhorVoltaGeral === null || $tempoSegundos < $melhorVoltaGeral) {
+        $melhorVoltaGeral = $tempoSegundos;
+        $pilotoMelhorVolta = $nome;
     }
 
     // Marca quando o primeiro piloto completou a volta final
@@ -74,30 +82,36 @@ foreach ($linhas as $linha) {
     }
 }
 
-// Agora precisamos ordenar os pilotos
+// Ordena pilotos
 usort($pilotos, function ($a, $b) {
-    // Ordena por voltas desc
     if ($a["voltas"] !== $b["voltas"]) {
         return $b["voltas"] <=> $a["voltas"];
     }
-    // Empate → menor tempo total vence
     return $a["tempoTotal"] <=> $b["tempoTotal"];
 });
 
-// Cabeçalho
-echo sprintf("%-8s %-8s %-15s %-8s %-12s %-12s\n", "Posição", "Código", "Piloto", "Voltas", "Tempo Total", "Melhor Volta");
-echo str_repeat("-", 70) . "\n";
+// Cabeçalho da tabela
+printf("%-8s %-8s %-18s %-8s %-12s %-12s %-16s\n",
+    "Posição", "Código", "Piloto", "Voltas", "Tempo Total", "Melhor Volta", "Velocidade Média"
+);
+echo str_repeat("-", 95) . "\n";
 
+// Exibe pilotos
 $posicao = 1;
 foreach ($pilotos as $p) {
-    echo sprintf(
-        "%-8d %-8s %-15s %-8d %-12s %-12s\n",
+    $mediaVelocidade = array_sum($p["velocidades"]) / count($p["velocidades"]);
+
+    printf("%-8d %-8s %-18s %-8d %-12s %-12s %-16.3f\n",
         $posicao,
         $p["codigo"],
         $p["nome"],
         $p["voltas"],
         formatarTempo($p["tempoTotal"]),
-        formatarTempo($p["melhorVolta"])
+        formatarTempo($p["melhorVolta"]),
+        $mediaVelocidade
     );
     $posicao++;
 }
+
+// Exibe melhor volta da corrida
+echo "\nMelhor volta da corrida: " . formatarTempo($melhorVoltaGeral) . " (" . $pilotoMelhorVolta . ")\n";
