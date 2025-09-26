@@ -9,9 +9,16 @@ function tempoParaSegundos($tempoStr) {
     return ((int)$min * 60) + (float)str_replace(",", ".", $resto);
 }
 
+// Função para formatar segundos em mm:ss.xxx
+function formatarTempo($segundos) {
+    $min = floor($segundos / 60);
+    $seg = $segundos - ($min * 60);
+    return sprintf("%d:%06.3f", $min, $seg);
+}
+
 // Lê o arquivo e ignora cabeçalho
 $linhas = file($arquivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-array_shift($linhas); // remove a primeira linha
+array_shift($linhas); // remove a primeira linha (cabeçalho)
 
 $pilotos = [];
 $voltasMax = 4; // corrida acaba em 4 voltas
@@ -19,6 +26,9 @@ $primeiroFim = null;
 
 // Processa cada linha do log
 foreach ($linhas as $linha) {
+    // Exemplo de linha:
+    // 23:49:08.277 038 – F.MASSA 1 1:02.852 44,275
+
     $partes = preg_split('/\s+/', $linha);
 
     $hora = $partes[0];                   // Hora da volta
@@ -43,6 +53,7 @@ foreach ($linhas as $linha) {
             "nome" => $nome,
             "voltas" => 0,
             "tempoTotal" => 0.0,
+            "melhorVolta" => null,
             "ultimaHora" => $hora
         ];
     }
@@ -51,6 +62,11 @@ foreach ($linhas as $linha) {
     $pilotos[$codigo]["voltas"] = $volta;
     $pilotos[$codigo]["tempoTotal"] += $tempoSegundos;
     $pilotos[$codigo]["ultimaHora"] = $hora;
+
+    // Atualiza melhor volta
+    if ($pilotos[$codigo]["melhorVolta"] === null || $tempoSegundos < $pilotos[$codigo]["melhorVolta"]) {
+        $pilotos[$codigo]["melhorVolta"] = $tempoSegundos;
+    }
 
     // Marca quando o primeiro piloto completou a volta final
     if ($volta === $voltasMax && $primeiroFim === null) {
@@ -69,23 +85,19 @@ usort($pilotos, function ($a, $b) {
 });
 
 // Cabeçalho
-echo sprintf("%-8s %-8s %-15s %-8s %-12s\n", "Posição", "Código", "Piloto", "Voltas", "Tempo Total");
-echo str_repeat("-", 55) . "\n";
+echo sprintf("%-8s %-8s %-15s %-8s %-12s %-12s\n", "Posição", "Código", "Piloto", "Voltas", "Tempo Total", "Melhor Volta");
+echo str_repeat("-", 70) . "\n";
 
 $posicao = 1;
 foreach ($pilotos as $p) {
-    // Formata tempo total em mm:ss.xxx
-    $min = floor($p["tempoTotal"] / 60);
-    $seg = $p["tempoTotal"] - ($min * 60);
-    $tempoFormatado = sprintf("%d:%06.3f", $min, $seg);
-
     echo sprintf(
-        "%-8d %-8s %-15s %-8d %-12s\n",
+        "%-8d %-8s %-15s %-8d %-12s %-12s\n",
         $posicao,
         $p["codigo"],
         $p["nome"],
         $p["voltas"],
-        $tempoFormatado
+        formatarTempo($p["tempoTotal"]),
+        formatarTempo($p["melhorVolta"])
     );
     $posicao++;
 }
