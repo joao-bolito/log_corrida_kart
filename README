@@ -1,0 +1,57 @@
+# 🏎️ Logs Corrida de Kart
+
+## 📌 Problema
+Dado um log de uma corrida de kart, é necessário processar os dados e gerar o resultado final da corrida com as seguintes informações:
+
+- Posição de chegada  
+- Código do piloto  
+- Nome do piloto  
+- Quantidade de voltas completadas  
+- Tempo total de prova  
+
+### Observações
+- A primeira linha do arquivo pode ser desconsiderada.  
+- A corrida termina quando o primeiro colocado completa 4 voltas.  
+- Input: arquivo de log (`corrida.txt`).  
+
+---
+
+## 🚀 Tecnologias Utilizadas
+- [PHP 8+](https://www.php.net/) (sem frameworks)  
+- POO (Programação Orientada a Objetos)  
+- Clean Code e boas práticas de separação de responsabilidades  
+
+---
+
+## 📂 Estrutura de Pastas
+src/
+│
+├── CLI/ # Entrada principal da aplicação
+│ └── index.php # Script para rodar a corrida
+│
+├── Domain/ # Entidades de negócio (ex: Piloto)
+│ └── piloto.php
+│
+├── Repositories/ # Acesso e leitura de dados
+│ └── CorridaRepository.php
+│
+├── Services/ # Regras de negócio e utilidades
+│ ├── corrida.txt # Arquivo de log da corrida
+│
+
+
+### ✅ Vantagens dessa organização
+- **Separa responsabilidades**: cada camada tem um papel claro.  
+- **Facilita manutenção**: mudanças em dados, domínio ou regras não afetam a CLI diretamente.  
+- **Escalabilidade**: projeto preparado para crescer de forma organizada.  
+
+---
+
+## ⚙️ Como Rodar o Projeto
+
+1. **Clone o repositório**:
+   ```bash
+   git clone https://github.com/seu-usuario/logs_corrida_kart.git
+   cd logs_corrida_kart
+   php src/CLI/index.php
+
